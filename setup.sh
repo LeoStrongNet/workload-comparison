@@ -1,1 +1,1 @@
-sudo apt install sysbench -y
+sudo apt update && sudo apt install sysbench -y
