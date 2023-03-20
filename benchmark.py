@@ -3,64 +3,85 @@ import re
 import os
 import sys
 
+############################################################
+# constants
+############################################################
+N_TRIES = 10
+GIGA_TO_BYTES = 1000000000
+MAX_PRIMES = [(10**i) * 10000 for i in range(4)]
+MEMORY_SIZES = range(100, 500, 100) #size in gigabytes
+FILEIO_SIZES = range(10, 30, 5) # size in gigabytes
+
+############################################################
+# functions
+############################################################
 def get_events_per_second(text):
     pattern = r"events per second:\s+([\d.]+)"
     match = re.search(pattern, text)
 
-    if match:
-        result = match.group(1)
-        return result
-    return "0"
+    return float(match.group(1))
 
 def get_mib_per_seconds(text):
     pattern = r"([\d.]+ MiB/sec)"
     match = re.search(pattern, text)
 
-    if match:
-        result = match.group(1)
-        return result
-    return "0"
+    return float(match.group(1))
 
 def get_throughput(text):
     start = text.find("written, MiB/s: ") + len("written, MiB/s: ")
     end = text.find("\n", start)
 
-    return text[start:end].strip()
+    return float(text[start:end].strip())
 
-#cpu usage
-report = "CPU:\n"
-for i in range(4):
-    v = str((10**i)*10000)
-    maxPrime = "--cpu-max-prime=" + v
-    result = subprocess.run(["sysbench", "--test=cpu", maxPrime, "run"], stdout=subprocess.PIPE)
-    value = result.stdout.decode('utf-8')
-    report += "\tmax-prime: " + v + " -> events per second: " + get_events_per_second(value) + "\n" 
-report += "\n"   
+############################################################
+# main
+############################################################
+platform = sys.argv[1]
+if not os.path.exists("./" + platform):
+    #fill up titles for csv
+    with open("report.csv", "w") as report:
+        report.write("Comparison between platform performances, all tests results are averages over " + str(N_TRIES) + " iterations\n")
+        for maxPrime in MAX_PRIMES:
+            report.write(",CPU (max-prime = " + str(maxPrime) + ")")
 
-#ram usage 
-report += "Memory:\n"
-for i in range(1, 5):
-    gigabytes = i * 100
-    v = str(gigabytes * 1000000000)
-    totalSize = "--memory-total-size=" + v
-    result = subprocess.run(["sysbench", "--test=memory", totalSize, "run"], stdout=subprocess.PIPE)
-    value = result.stdout.decode('utf-8')
-    report += "\ttotal size: " +  str(gigabytes) + "G -> MiB per seconds: " + get_mib_per_seconds(value) + "\n"
-report += "\n"
+        for memSize in MEMORY_SIZES:
+            report.write(",Memory (total-mem-size = " + str(memSize) + "GBs)")
 
-#io latency
-report += "FileIO:\n"
-for i in range(1, 5):
-    v = str(i * 10)
-    totalSize = "--file-total-size=" + v
-    result = subprocess.run(["sysbench", "--test=fileio", "--file-test-mode=seqwr", "run"], stdout=subprocess.PIPE)
+        for fileSize in FILEIO_SIZES:
+            report.write(",FileIO (total-file-size = " + str(fileSize) + "GBs)")
+
+with open("report.csv", "a") as report:
+    report.write("\n" + platform)
+
+    #cpu stats
+    for maxPrime in FILEIO_SIZES:
+        arg = "--cpu-max-prime=" + str(maxPrime)
+        values = 0
+        for i in range(N_TRIES):
+            result = subprocess.run(["sysbench", "--test=cpu", arg, "run"], stdout=subprocess.PIPE)
+            values += get_events_per_second(result.stdout.decode('utf-8'))
+        #calculate average and put in csv
+        value = values / N_TRIES
+        report.write("," + str(value) + " (events per second)")
     
-    #remove all the test files
-    os.system("rm test_file.*")
-    value = result.stdout.decode('utf-8')
-    report += "\ttotal size: " + v + "G -> throughput (MiB/s): " + get_throughput(value) + "\n"
-
-filename = sys.argv[1] + ".txt"
-with open(filename, "w") as file:
-    file.write(report)
-print(report)
+    #memory stats
+    for memSize in MEMORY_SIZES:
+        arg = "--memory-total-size=" + str(memSize * GIGA_TO_BYTES)
+        values = 0
+        for i in range(N_TRIES):
+            result = subprocess.run(["sysbench", "--test=memory", arg, "run"], stdout=subprocess.PIPE)
+            values += get_mib_per_seconds(result.stdout.decode('utf-8'))
+        #calculate average and put in csv
+        value = values / N_TRIES
+        report.write("," + str(value) + " (MiB/s)")
+    
+    #fileio stats
+    for fileSize in FILEIO_SIZES:
+        arg = "--file-total-size=" + str(fileSize * GIGA_TO_BYTES)
+        values = 0
+        for i in range(N_TRIES):
+            result = subprocess.run(["sysbench", "--test=fileio", "--file-test-mode=seqwr", arg, "run"], stdout=subprocess.PIPE)
+            values += get_throughput(result.stdout.decode('utf-8'))
+        #calculate average and put in csv
+        value = values / N_TRIES
+        report.write("," + str(value) + " (MiB/s)")
