@@ -1,0 +1,17 @@
+CPU usage:
+	max-prime: 10000 -> events per second: 899.69
+	max-prime: 100000 -> events per second: 38.04
+	max-prime: 1000000 -> events per second: 1.55
+	max-prime: 10000000 -> events per second: 0.06
+
+Memory usage:
+	total size: 100G -> MiB per seconds: 4234.77 MiB/sec
+	total size: 200G -> MiB per seconds: 4234.03 MiB/sec
+	total size: 300G -> MiB per seconds: 4237.39 MiB/sec
+	total size: 400G -> MiB per seconds: 4229.22 MiB/sec
+
+FileIO usage:
+	total size: 10G -> throughput (MiB/s): 102.42
+	total size: 20G -> throughput (MiB/s): 108.62
+	total size: 30G -> throughput (MiB/s): 107.56
+	total size: 40G -> throughput (MiB/s): 107.84
