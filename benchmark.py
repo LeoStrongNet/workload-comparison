@@ -28,7 +28,7 @@ def get_throughput(text):
     return text[start:end].strip()
 
 #cpu usage
-report = "CPU usage:\n"
+report = "CPU:\n"
 for i in range(4):
     v = str((10**i)*10000)
     maxPrime = "--cpu-max-prime=" + v
@@ -38,7 +38,7 @@ for i in range(4):
 report += "\n"   
 
 #ram usage 
-report += "Memory usage:\n"
+report += "Memory:\n"
 for i in range(1, 5):
     gigabytes = i * 100
     v = str(gigabytes * 1000000000)
@@ -49,7 +49,7 @@ for i in range(1, 5):
 report += "\n"
 
 #io latency
-report += "FileIO usage:\n"
+report += "FileIO:\n"
 for i in range(1, 5):
     v = str(i * 10)
     totalSize = "--file-total-size=" + v
