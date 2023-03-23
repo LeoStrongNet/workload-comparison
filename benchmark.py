@@ -1,3 +1,11 @@
+########################################################################################################################
+# Description: script to test the performance of a system based on different metrics.
+#              script is meant to be run on many different systems, and then results outputed into a file
+# args: 
+#   1. name of system that is being tested
+#   2. path of file to store results in
+########################################################################################################################
+
 import subprocess
 import re
 import os
