@@ -6,7 +6,7 @@ import sys
 ############################################################
 # constants
 ############################################################
-N_TRIES = 10
+N_TRIES = 3
 GIGA_TO_BYTES = 1000000000
 MAX_PRIMES = [(10**i) * 10000 for i in range(4)]
 MEMORY_SIZES = range(100, 500, 100) #size in gigabytes
@@ -22,7 +22,7 @@ def get_events_per_second(text):
     return float(match.group(1))
 
 def get_mib_per_seconds(text):
-    pattern = r"([\d.]+ MiB/sec)"
+    pattern = r'(\d+\.\d+) MiB/sec'
     match = re.search(pattern, text)
 
     return float(match.group(1))
@@ -37,9 +37,10 @@ def get_throughput(text):
 # main
 ############################################################
 platform = sys.argv[1]
-if not os.path.exists("./" + platform):
+filename = sys.argv[2]
+if not os.path.exists(filename):
     #fill up titles for csv
-    with open("report.csv", "w") as report:
+    with open(filename, "w") as report:
         report.write("Comparison between platform performances, all tests results are averages over " + str(N_TRIES) + " iterations\n")
         for maxPrime in MAX_PRIMES:
             report.write(",CPU (max-prime = " + str(maxPrime) + ")")
@@ -50,11 +51,11 @@ if not os.path.exists("./" + platform):
         for fileSize in FILEIO_SIZES:
             report.write(",FileIO (total-file-size = " + str(fileSize) + "GBs)")
 
-with open("report.csv", "a") as report:
+with open(filename, "a") as report:
     report.write("\n" + platform)
 
     #cpu stats
-    for maxPrime in FILEIO_SIZES:
+    for maxPrime in MAX_PRIMES:
         arg = "--cpu-max-prime=" + str(maxPrime)
         values = 0
         for i in range(N_TRIES):
@@ -81,6 +82,7 @@ with open("report.csv", "a") as report:
         values = 0
         for i in range(N_TRIES):
             result = subprocess.run(["sysbench", "--test=fileio", "--file-test-mode=seqwr", arg, "run"], stdout=subprocess.PIPE)
+            os.system('rm test_file.*')
             values += get_throughput(result.stdout.decode('utf-8'))
         #calculate average and put in csv
         value = values / N_TRIES
