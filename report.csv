@@ -1,3 +1,3 @@
 Comparison between platform performances, all tests results are averages over 3 iterations
 ,CPU (max-prime = 10000),CPU (max-prime = 100000),CPU (max-prime = 1000000),CPU (max-prime = 10000000),Memory (total-mem-size = 100GBs),Memory (total-mem-size = 200GBs),Memory (total-mem-size = 300GBs),Memory (total-mem-size = 400GBs),FileIO (total-file-size = 10GBs),FileIO (total-file-size = 15GBs),FileIO (total-file-size = 20GBs),FileIO (total-file-size = 25GBs)
-strong_15gb,4103.21 (events per second),179.94 (events per second),7.43 (events per second),0.29 (events per second),6652.18 (MiB/s),6672.67 (MiB/s),6676.41 (MiB/s),6668.76 (MiB/s),131.4 (MiB/s),127.55 (MiB/s),127.68 (MiB/s),127.63 (MiB/s)
+workstations_8cpu_32ram,904.64 (events per second),38.43 (events per second),1.55 (events per second),0.06 (events per second),4262.47 (MiB/s),4217.12 (MiB/s),4265.22 (MiB/s),4262.95 (MiB/s),119.9 (MiB/s),119.83 (MiB/s),120.12 (MiB/s),120.16 (MiB/s)
