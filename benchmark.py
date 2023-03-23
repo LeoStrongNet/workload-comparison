@@ -15,6 +15,7 @@ import sys
 # constants
 ############################################################
 N_TRIES = 3
+DECIMAL_PRECISION = 2
 GIGA_TO_BYTES = 1000000000
 MAX_PRIMES = [(10**i) * 10000 for i in range(4)]
 MEMORY_SIZES = range(100, 500, 100) #size in gigabytes
@@ -70,7 +71,7 @@ with open(filename, "a") as report:
             result = subprocess.run(["sysbench", "--test=cpu", arg, "run"], stdout=subprocess.PIPE)
             values += get_events_per_second(result.stdout.decode('utf-8'))
         #calculate average and put in csv
-        value = values / N_TRIES
+        value = round(values / N_TRIES, DECIMAL_PRECISION)
         report.write("," + str(value) + " (events per second)")
     
     #memory stats
@@ -81,7 +82,7 @@ with open(filename, "a") as report:
             result = subprocess.run(["sysbench", "--test=memory", arg, "run"], stdout=subprocess.PIPE)
             values += get_mib_per_seconds(result.stdout.decode('utf-8'))
         #calculate average and put in csv
-        value = values / N_TRIES
+        value = round(values / N_TRIES, DECIMAL_PRECISION)
         report.write("," + str(value) + " (MiB/s)")
     
     #fileio stats
@@ -93,5 +94,5 @@ with open(filename, "a") as report:
             os.system('rm test_file.*')
             values += get_throughput(result.stdout.decode('utf-8'))
         #calculate average and put in csv
-        value = values / N_TRIES
+        value = round(values / N_TRIES, DECIMAL_PRECISION)
         report.write("," + str(value) + " (MiB/s)")
